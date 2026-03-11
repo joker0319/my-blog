@@ -1,132 +1,113 @@
+// app/page.tsx
 'use client';
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import Card from '@/components/Card';
+import CenterCard from '@/components/CenterCard';
+import useWindowSize from '@/hooks/useWindowSize';
 
+// 卡片数据源
 const cardData = [
   {
     id: '1',
-    title: '1',
-    position: {
-      top: '50%',
-      left: '50%',
-      width: 350,
-      height: 250,
-    },
+    title: `Hi,I'm jojo`,
+    desktop: { top: '50%', left: '50%', width: 400, height: 300, x: -200, y: -150 },
+    mobile: { width: '100%', height: 200 },
     isCenter: true,
   },
   {
     id: '2',
     title: '2',
-    position: {
-      top: '10%',
-      left: '15%',
-      width: 200,
-      height: 250,
-    },
+    desktop: { top: '15%', left: '15%', width: 200, height: 250 },
+    mobile: { width: '100%', height: 180 },
     isCenter: false,
   },
   {
     id: '3',
     title: '3',
-    position: {
-      top: '70%',
-      left: '70%',
-      width: 200,
-      height: 200,
-    },
+    desktop: { top: '64%', left: '70%', width: 200, height: 250 },
+    mobile: { width: '100%', height: 180 },
     isCenter: false,
   },
   {
     id: '4',
     title: '4',
-    position: {
-      top: '15%',
-      left: '70%',
-      width: 180,
-      height: 220,
-    },
+    desktop: { top: '15%', left: '70%', width: 200, height: 250 },
+    mobile: { width: '100%', height: 180 },
     isCenter: false,
   },
-   {
+  {
     id: '5',
     title: '5',
-    position: {
-      top: '1%',
-      left: '38%',
-      width: 350,
-      height: 130,
-    },
+    desktop: { top: '1%', left: '34%', width: 400, height: 150 },
+    mobile: { width: '100%', height: 150 },
     isCenter: false,
   },
   {
     id: '6',
     title: '6',
-    position: {
-      top: '65%',
-      left: '15%',
-      width: 200,
-      height: 200,
-    },
+    desktop: { top: '65%', left: '15%', width: 200, height: 250 },
+    mobile: { width: '100%', height: 180 },
     isCenter: false,
   },
   {
     id: '7',
     title: '7',
-    position: {
-      top: '80%',
-      left: '40%',
-      width: 300,
-      height: 150,
-    },
+    desktop: { top: '80%', left: '34%', width: 400, height: 150 },
+    mobile: { width: '100%', height: 150 },
     isCenter: false,
   },
 ];
 
+
 export default function Home() {
+  const [isClientMounted, setIsClientMounted] = useState(false);
+  const size = useWindowSize();
+
+  // 标记客户端挂载
+  useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
+
+  // 响应式判断
+  const isMobile = isClientMounted ? size.width < 1024 : false;
+  const isDesktop = isClientMounted ? size.width >= 1024 : true;
+
+  // 加载态
+  if (!isClientMounted) {
+    return <div className="max-w-7xl mx-auto px-4 py-8">Loading...</div>;
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-4xl font-bold text-center mb-8">Hi,I'm jojo</h1>
-      {/* 父容器必须 relative + 高度 */}
-      <div className="relative w-full h-[600px] mb-20">
-        {cardData.map((card) => (
-          <motion.div
-            key={card.id}
-
-            style={{
-              position: 'absolute',
-              top: card.position.top,
-              left: card.position.left,
-              width: card.position.width + 'px',
-              height: card.position.height + 'px',
-              zIndex: card.isCenter ? 10 : 5,
-            }}
-
-            // ✅ 关键：所有 transform 必须写在这里！！！
-            initial={
-              card.isCenter
-                ? { x: -150, y: -125,opacity: 0, scale: 0.9 }
-                : { opacity: 0, scale: 0.9 }
-            }
-            animate={
-              card.isCenter
-                ? { x: -150, y: -125, opacity: 1, scale: 1 }
-                : { opacity: 1, scale: 1 }
-            }
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.2 }
-            }}
-            transition={{ duration: 0.5 }}
-          >
-            <Link href="/about">
-              <div className="w-full h-full bg-white/90 rounded-xl p-6 shadow-md flex items-center justify-center text-3xl">
-                {card.title}
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+      <div 
+        className={`
+          w-full mx-auto
+          ${isMobile ? 'flex flex-col gap-6' : 'relative h-[700px]'}
+          mb-12 sm:mb-20
+        `}
+      >
+        {cardData.map((card) => {
+          // 根据屏幕尺寸选择配置
+          const config = isDesktop ? card.desktop : card.mobile;
+          
+          return (
+            <Card
+              key={card.id}
+              id={card.id}
+              title={card.title}
+              config={config}
+              isCenter={card.isCenter}
+              isMobile={isMobile}
+            >
+              {/* 中心卡片注入自定义内容 */}
+              {card.isCenter && <CenterCard isMobile={isMobile} />}
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
 }
+
+
